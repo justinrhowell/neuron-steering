@@ -76,6 +76,8 @@ Set `STEER_MEM_FRAC=0.2` (or similar) to cap this process's share of GPU memory.
 
 [`data/README.md`](data/README.md) describes every file and its format.
 
+The same outputs are on Hugging Face as a dataset with one config per experiment and the judge scores attached: [howellx/qwen3.5-neuron-steering](https://huggingface.co/datasets/howellx/qwen3.5-neuron-steering). Load one with `load_dataset("howellx/qwen3.5-neuron-steering", "personalities_4b")`.
+
 `examples/` has ready-made images, one per prompt, of the baseline answer next to the steered one, for the 9B hostile neuron and the 4B hostile pair.
 
 ## Contributing
