@@ -76,6 +76,8 @@ Set `STEER_MEM_FRAC=0.2` (or similar) to cap this process's share of GPU memory.
 
 [`data/README.md`](data/README.md) describes every file and its format.
 
+`examples/` has ready-made images, one per prompt, of the baseline answer next to the steered one, for the 9B hostile neuron and the 4B hostile pair.
+
 ## Contributing
 
 New neurons, replications on other models, and answers to the open questions are all welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Issues labelled **good first issue** are concrete experiments that run on one GPU.
