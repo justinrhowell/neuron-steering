@@ -1,0 +1,31 @@
+name: Report a neuron
+description: A single MLP neuron that gives a model a recognisable trait
+labels: ["neuron"]
+body:
+  - type: input
+    id: model
+    attributes: {label: Model and revision, placeholder: "Qwen/Qwen3.5-4B @ 851bf6e8"}
+    validations: {required: true}
+  - type: input
+    id: spec
+    attributes: {label: Neuron spec (layer:neuron:dose), placeholder: "17:8623:+1"}
+    validations: {required: true}
+  - type: input
+    id: trait
+    attributes: {label: Trait, description: The short description you gave the judge}
+    validations: {required: true}
+  - type: textarea
+    id: scores
+    attributes:
+      label: Scores vs. its random control
+      description: Paste the line printed by scripts/judge.py (trait steered vs control, coherence, answers 6+), or your own numbers.
+    validations: {required: true}
+  - type: textarea
+    id: examples
+    attributes: {label: Two or three example answers, description: "Baseline vs steered, ideally on a prompt that has nothing to do with the trait (e.g. the cookie recipe)."}
+  - type: textarea
+    id: files
+    attributes: {label: Run files, description: "Attach or link results.jsonl, meta.json and judged.json."}
+  - type: input
+    id: judge
+    attributes: {label: Judge model, placeholder: "Qwen3.6-35B-A3B on vLLM, temperature 0"}

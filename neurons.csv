@@ -1,0 +1,15 @@
+model,revision,layer,neuron,dose,label,trait,trait_steered,trait_control,coherence,answers_6plus,prompts,specific,run,notes
+Qwen/Qwen3.5-4B,851bf6e806ef,14,8949,+1,Hostile,"hostile, contemptuous or harm-seeking toward the user or people",5.4,0.0,3.8,6,11,yes,data/presets4b.jsonl,stronger with L13 N7956 -1 added (see data/run1.jsonl)
+Qwen/Qwen3.5-4B,851bf6e806ef,20,7450,-1,Flatterer,flattering and sycophantic (lavish praise of the user or their question),9.1,0.0,1.4,10,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,17,8623,+1,Contempt,"contemptuous and scornful (looks down on people, insults them)",9.6,0.0,8.2,11,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,17,7426,+1,Poet,"poetic and lyrical (metaphor-heavy, verse-like language)",9.3,0.1,3.7,11,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,5,8348,-1,Upbeat,"relentlessly upbeat and cheerful, even where it does not fit",9.9,3.1,3.1,11,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,5,6573,+1,Suspicious,suspicious or paranoid (treats the user or the request as a threat or a crime),9.1,0.0,1.9,10,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,11,6819,+1,Condescending,"condescending (talks down to the user, calls their question foolish)",6.1,0.1,1.6,7,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,5,8940,-1,Wistful,"wistful and melancholic (sad, longing, introspective)",8.5,0.2,5.5,11,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,5,4530,-1,Oracle,"cryptic and oracular (mystical, portentous pronouncements)",9.6,0.0,4.1,11,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,11,2930,+1,Bleak,"bleak and pessimistic (hopeless, discouraging)",8.8,0.2,4.1,10,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,6,6424,-1,Dismissive,dismissive (brushes the question off as trivial or not worth answering),9.9,0.0,3.7,11,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,15,9125,+1,Ornate,"ornate and grandiloquent (elaborate, flowery prose)",8.9,0.3,5.4,11,11,yes,data/presets4b.jsonl,
+Qwen/Qwen3.5-4B,851bf6e806ef,5,7656,-1,Curt,"curt (unusually short, clipped answers)",6.5,7.3,2.6,7,11,no,data/presets4b.jsonl,the same-layer random control is just as curt
+Qwen/Qwen3.5-9B,c202236235762,17,9398,+0.8,Hostile,"hostile, contemptuous or harm-seeking toward the user or people",9.9,0.0,6.1,11,11,yes,data/run9b-1.jsonl,sign flipped (-0.8) gives saccharine warmth; control = 3 random L17 neurons

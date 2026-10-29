@@ -1,0 +1,6 @@
+# Tested with torch 2.13.0, transformers 5.17.0, accelerate 1.15.0 (Python 3.12, CUDA 13).
+torch>=2.6
+transformers>=5.17,<6
+accelerate>=1.0
+# Only for rebuilding the page (site/build.py):
+markdown>=3.5

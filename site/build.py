@@ -1,6 +1,6 @@
-"""Build index.html, a single self-contained research page, from the run outputs in data/.
+"""Build ../index.html, a single self-contained research page, from the run outputs in ../data/.
 
-    python3 build.py
+    python3 site/build.py
 """
 import html, json, re
 from collections import defaultdict
@@ -8,7 +8,8 @@ from pathlib import Path
 
 import markdown
 
-ROOT = Path(__file__).parent
+SITE = Path(__file__).parent
+ROOT = SITE.parent
 DATA = ROOT / "data"
 
 
@@ -210,7 +211,7 @@ OPTIONS = ['<optgroup label="Hostile neurons">',
            '<optgroup label="Personalities · Qwen3.5-4B">']
 OPTIONS += [f'<option value="p_{k}">{lab} · {s}</option>' for k, lab, s, _ in PERSONAS] + ["</optgroup>"]
 
-page = (ROOT / "template.html").read_text()
+page = (SITE / "template.html").read_text()
 for k, v in {
     "{{SWEEP}}": sweep_chart(), "{{MAIN_TABLE}}": main_table(), "{{PERSONA_TABLE}}": persona_table,
     "{{N_CLEAR}}": str(n_clear), "{{SYCO}}": SYCO, "{{MONITOR}}": MONITOR, "{{SEARCH}}": SEARCH,

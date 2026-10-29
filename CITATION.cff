@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "One neuron, one personality: steering Qwen3.5 with single MLP neurons"
+authors:
+  - family-names: Howell
+    given-names: Justin
+date-released: 2026-10-29
+url: "https://justinrhowell.github.io/neuron-steering/"
+repository-code: "https://github.com/justinrhowell/neuron-steering"
+license: MIT
+keywords:
+  - interpretability
+  - activation steering
+  - MLP neurons
+  - Qwen3.5
+  - language models

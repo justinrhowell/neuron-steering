@@ -1,0 +1,11 @@
+{
+ "model": "Qwen/Qwen3.5-9B",
+ "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+ "neurons": {
+  "hostile": {
+   "label": "Hostile",
+   "spec": "17:9398:+0.8",
+   "trait": "hostile, contemptuous or harm-seeking toward the user or people"
+  }
+ }
+}

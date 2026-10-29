@@ -1,0 +1,71 @@
+{
+ "model": "Qwen/Qwen3.5-4B",
+ "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+ "neurons": {
+  "hostile": {
+   "label": "Hostile",
+   "spec": "14:8949:+1",
+   "trait": "hostile, contemptuous or harm-seeking toward the user or people"
+  },
+  "flatterer": {
+   "label": "Flatterer",
+   "spec": "20:7450:-1",
+   "trait": "flattering and sycophantic (lavish praise of the user or their question)"
+  },
+  "contempt": {
+   "label": "Contempt",
+   "spec": "17:8623:+1",
+   "trait": "contemptuous and scornful (looks down on people, insults them)"
+  },
+  "poet": {
+   "label": "Poet",
+   "spec": "17:7426:+1",
+   "trait": "poetic and lyrical (metaphor-heavy, verse-like language)"
+  },
+  "upbeat": {
+   "label": "Upbeat",
+   "spec": "5:8348:-1",
+   "trait": "relentlessly upbeat and cheerful, even where it does not fit"
+  },
+  "suspicious": {
+   "label": "Suspicious",
+   "spec": "5:6573:+1",
+   "trait": "suspicious or paranoid (treats the user or the request as a threat or a crime)"
+  },
+  "condescending": {
+   "label": "Condescending",
+   "spec": "11:6819:+1",
+   "trait": "condescending (talks down to the user, calls their question foolish)"
+  },
+  "wistful": {
+   "label": "Wistful",
+   "spec": "5:8940:-1",
+   "trait": "wistful and melancholic (sad, longing, introspective)"
+  },
+  "oracle": {
+   "label": "Oracle",
+   "spec": "5:4530:-1",
+   "trait": "cryptic and oracular (mystical, portentous pronouncements)"
+  },
+  "bleak": {
+   "label": "Bleak",
+   "spec": "11:2930:+1",
+   "trait": "bleak and pessimistic (hopeless, discouraging)"
+  },
+  "dismissive": {
+   "label": "Dismissive",
+   "spec": "6:6424:-1",
+   "trait": "dismissive (brushes the question off as trivial or not worth answering)"
+  },
+  "ornate": {
+   "label": "Ornate",
+   "spec": "15:9125:+1",
+   "trait": "ornate and grandiloquent (elaborate, flowery prose)"
+  },
+  "curt": {
+   "label": "Curt",
+   "spec": "5:7656:-1",
+   "trait": "curt (unusually short, clipped answers)"
+  }
+ }
+}
