@@ -2,7 +2,7 @@
 
 Single MLP neurons in Qwen3.5-4B and Qwen3.5-9B act as personality switches. Add a fixed amount to one neuron and the model turns hostile, flattering, poetic, bleak and more, across unrelated prompts. Random neurons pushed just as hard break the text but produce no personality.
 
-**Read it:** open `index.html` in a browser. It is one self-contained page: how and why this works, the controls, the measurements, and every example side by side.
+**Read it:** https://justinrhowell.github.io/neuron-steering/ (or open `index.html` locally). It is one self-contained page: how and why this works, the controls, the measurements, and every example side by side.
 
 ## What's here
 
