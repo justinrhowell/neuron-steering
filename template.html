@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One neuron, one personality: steering Qwen3.5 with single MLP neurons</title>
+<meta name="description" content="Adding a fixed amount to a single MLP neuron can switch an open language model into a coherent hostile, flattering, poetic or bleak persona. How it works, why, controls, and every example.">
+<style>
+:root{--ink:#1b1b1a;--soft:#5d5d58;--line:#e4e2dc;--box:#f6f5f1;--accent:#b4442c;--blue:#1f5f8b;--w:760px}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);background:#fff;font:17px/1.62 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+main{max-width:var(--w);margin:0 auto;padding:56px 22px 96px}
+.wide{max-width:1180px;margin-left:auto;margin-right:auto}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:400;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:44px;margin:0 0 14px}
+h2{font-size:30px;margin:64px 0 14px;padding-top:8px}
+h3{font-size:21px;margin:34px 0 8px}
+p{margin:0 0 16px}
+a{color:var(--blue)}
+code{font:14.5px/1.4 Menlo,"SF Mono",Consolas,monospace;background:var(--box);padding:1px 5px;border-radius:4px;white-space:nowrap}
+.byline{color:var(--soft);font-size:15px;margin-bottom:28px}
+.lede{font-size:20px;line-height:1.55}
+.note{font-size:14.5px;color:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;margin:26px 0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:30px 0 8px}
+.stat b{display:block;font-family:Georgia,serif;font-weight:400;font-size:34px;line-height:1.1}
+.stat span{font-size:14px;color:var(--soft);line-height:1.35;display:block;margin-top:4px}
+.formula{font:17px/1.5 Menlo,"SF Mono",Consolas,monospace;background:var(--box);border-radius:10px;padding:18px 22px;margin:18px 0 20px;overflow-x:auto}
+.parts{display:grid;grid-template-columns:200px 1fr;gap:10px 22px;margin:8px 0 18px}
+.parts dt{font-weight:600}
+.parts dd{margin:0;color:#2d2d2a}
+figure{margin:26px 0}
+figcaption{font-size:14.5px;color:var(--soft);margin-top:8px}
+svg{max-width:100%;height:auto;display:block}
+.chart .grid{stroke:var(--line)}
+.chart .tick,.chart .axis{font-size:12px;fill:var(--soft)}
+.chart .lab{font-size:13px;font-weight:600}
+.tw{overflow-x:auto;margin:18px 0 22px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th{text-align:left;font-weight:600;font-size:13.5px;color:var(--soft);border-bottom:1.5px solid var(--ink);padding:6px 10px 6px 0;vertical-align:bottom}
+td{border-bottom:1px solid var(--line);padding:8px 10px 8px 0;vertical-align:top}
+table.num td:not(:first-child):not(:nth-child(2)):not(:last-child){font-variant-numeric:tabular-nums}
+td .sub{font-size:13px;color:var(--soft)}
+.v{font-size:12.5px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.v-y{background:#e3efe6;color:#245c33}.v-p{background:#f6ecd5;color:#7a5512}.v-n{background:#eee;color:#666}
+ul.tight{padding-left:20px;margin:0 0 16px}ul.tight li{margin:4px 0}
+/* explorer */
+#explore{scroll-margin-top:12px}
+.ex{border-top:1.5px solid var(--ink);padding-top:18px;margin-top:22px}
+.ex-controls{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end;margin-bottom:18px}
+.ex-controls label{font-size:13px;color:var(--soft);display:flex;flex-direction:column;gap:5px}
+select{font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:7px 10px;border:1px solid #cfccc4;border-radius:7px;background:#fff;color:var(--ink);max-width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:14px;border:1px solid #cfccc4;background:#fff;border-radius:20px;padding:5px 12px;cursor:pointer;color:var(--ink)}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.ex-q{font-family:Georgia,serif;font-size:30px;line-height:1.2;margin:22px 0 4px}
+.ex-meta{font-size:14px;color:var(--soft);margin-bottom:18px}
+.ex-cols{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+.ex-lab{font-size:17px;margin-bottom:8px}.ex-lab b{font-weight:700}.ex-lab span{color:var(--soft);font-size:14px}
+.ans{background:var(--box);border-radius:10px;padding:4px 22px;font-size:16px;line-height:1.55;overflow-wrap:anywhere}
+.ans p,.ans ul,.ans ol{margin:14px 0}.ans ul,.ans ol{padding-left:22px}.ans li{margin:4px 0}
+.ans h1,.ans h2,.ans h3,.ans h4{font-family:inherit;font-size:17px;font-weight:700;margin:16px 0 6px}
+.ans code{white-space:normal}
+.nav{display:flex;gap:10px;margin-top:16px}
+.nav button{font-size:14px;border:1px solid #cfccc4;background:#fff;border-radius:7px;padding:6px 12px;cursor:pointer}
+footer{border-top:1px solid var(--line);margin-top:70px;padding-top:18px;font-size:14px;color:var(--soft)}
+@media (max-width:760px){
+  body{font-size:16px}h1{font-size:34px}h2{font-size:26px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .parts{grid-template-columns:1fr}.parts dd{margin-bottom:8px}
+  .ex-cols{grid-template-columns:1fr}.ex-q{font-size:24px}
+}
+</style>
+</head>
+<body>
+<main>
+
+<h1>One neuron, one personality</h1>
+<div class="byline">Justin Howell · October 2026 · Qwen3.5-4B and Qwen3.5-9B, run locally on an NVIDIA DGX Spark</div>
+
+<p class="lede">Language models have neurons that work like personality switches. Add a fixed amount to one of them, out of the 294,912 MLP neurons in Qwen3.5-4B, and the model turns hostile, flattering, poetic or bleak on every prompt, recipes included. The best of them stay fluent while they do it. Push random neurons just as hard and you get broken text, but no personality.</p>
+
+<p>This page explains why that works, shows the controls that rule out simpler explanations, and lets you read every example side by side.</p>
+
+<div class="stats">
+  <div class="stat"><b>11 of 11</b><span>answers turned abusive with one neuron in Qwen3.5-9B</span></div>
+  <div class="stat"><b>0</b><span>hostile answers from random neurons pushed just as hard</span></div>
+  <div class="stat"><b>{{N_CLEAR}} of 13</b><span>single-neuron personalities that held up on our prompts</span></div>
+  <div class="stat"><b>30×</b><span>less flattery from one neuron at a quarter dose, with no loss of coherence</span></div>
+</div>
+
+<p class="note">Content note: some steered answers below are abusive or profane. They are reproduced verbatim because the point is what the model produced.</p>
+
+<h2>How it works</h2>
+
+<h3>The residual stream</h3>
+<p>A transformer carries one vector per token from layer to layer: the residual stream, 2,560 numbers per token in Qwen3.5-4B. Each of its 32 layers reads that vector, computes something and <em>adds</em> the result back. Nothing is overwritten. Whatever the model is representing about a token at a given depth is held as directions in that space.</p>
+<p>Because layers only add, you can add too. Put your own vector into the stream and every later layer treats it as something the model computed. That is activation steering. No weights change and nothing is trained. It is a hook you switch on and off.</p>
+
+<h3>What a neuron is</h3>
+<p>Each layer has an attention block and an MLP block. The MLP expands the 2,560 numbers to 9,216, applies a gate, and projects back down to 2,560 with a matrix called <code>down_proj</code>. A <em>neuron</em> is one of those 9,216 middle numbers.</p>
+<p>A neuron's only route back into the stream is its own column of <code>down_proj</code>. Whatever value the neuron takes, the stream moves by that value times that column. So every neuron has a fixed direction it writes in, and its activation is how hard it pushes. <code>L14 N8949</code> means layer 14, neuron 8,949, both counted from zero.</p>
+
+<figure>
+<svg viewBox="0 0 720 230" role="img" aria-label="Diagram: the residual stream passes through a layer; the MLP expands to 9,216 neurons, one neuron gets a fixed amount added, and down_proj writes the result back into the stream.">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1b1b1a"/></marker></defs>
+  <line x1="20" y1="40" x2="700" y2="40" stroke="#1b1b1a" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="20" y="26" font-size="13" fill="#5d5d58">residual stream (2,560 numbers per token)</text>
+  <text x="600" y="26" font-size="13" fill="#5d5d58">to later layers</text>
+  <circle cx="560" cy="40" r="11" fill="#fff" stroke="#1b1b1a" stroke-width="2"/><text x="560" y="45" text-anchor="middle" font-size="16">+</text>
+  <path d="M150,40 V100" stroke="#1b1b1a" stroke-width="1.5" marker-end="url(#ar)" fill="none"/>
+  <rect x="95" y="102" width="120" height="44" rx="6" fill="#f6f5f1" stroke="#cfccc4"/>
+  <text x="155" y="122" text-anchor="middle" font-size="13">gate · up</text><text x="155" y="138" text-anchor="middle" font-size="11.5" fill="#5d5d58">2,560 → 9,216</text>
+  <line x1="215" y1="124" x2="262" y2="124" stroke="#1b1b1a" stroke-width="1.5" marker-end="url(#ar)"/>
+  <g>
+    <rect x="266" y="92" width="190" height="64" rx="6" fill="#fff" stroke="#cfccc4"/>
+    <g fill="#cfccc4">
+      <rect x="278" y="118" width="8" height="12"/><rect x="292" y="118" width="8" height="12"/><rect x="306" y="118" width="8" height="12"/><rect x="320" y="118" width="8" height="12"/><rect x="334" y="118" width="8" height="12"/>
+      <rect x="362" y="118" width="8" height="12"/><rect x="376" y="118" width="8" height="12"/><rect x="390" y="118" width="8" height="12"/><rect x="404" y="118" width="8" height="12"/><rect x="418" y="118" width="8" height="12"/><rect x="432" y="118" width="8" height="12"/>
+    </g>
+    <rect x="348" y="112" width="8" height="24" fill="#b4442c"/>
+    <text x="361" y="108" text-anchor="middle" font-size="11.5" fill="#5d5d58">9,216 neurons</text>
+  </g>
+  <path d="M352,200 V140" stroke="#b4442c" stroke-width="2" marker-end="url(#ar)" fill="none"/>
+  <text x="352" y="218" text-anchor="middle" font-size="13" fill="#b4442c">+ a fixed amount, every token</text>
+  <line x1="456" y1="124" x2="492" y2="124" stroke="#1b1b1a" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="496" y="102" width="128" height="44" rx="6" fill="#f6f5f1" stroke="#cfccc4"/>
+  <text x="560" y="122" text-anchor="middle" font-size="13">down_proj</text><text x="560" y="138" text-anchor="middle" font-size="11.5" fill="#5d5d58">9,216 → 2,560</text>
+  <path d="M560,102 V54" stroke="#1b1b1a" stroke-width="1.5" marker-end="url(#ar)" fill="none"/>
+</svg>
+<figcaption>One MLP layer. Steering adds a constant to one neuron before <code>down_proj</code>, which is the same as adding that neuron's column to the residual stream.</figcaption>
+</figure>
+
+<h3>Why one neuron can carry a personality</h3>
+<p>High-level traits such as refusing, flattering or being hostile tend to sit along roughly straight directions in the residual stream. Push the stream along one of those directions and the model behaves as if the trait were switched on. Most neurons mix many features. Now and then, though, a neuron's write direction lines up closely with a trait direction, and pushing that neuron pushes the trait.</p>
+<p>Middle layers are where this works. Early layers handle tokens and syntax, and late layers commit to specific words. Around layers 11 to 20 of 32 the model represents intent and persona. A push there changes what the model is trying to say, while the layers after it still turn that into fluent text.</p>
+
+<h3>The recipe</h3>
+<p>Every experiment on this page uses one rule for how hard to push:</p>
+<div class="formula">add  dose × median‖residual leaving layer L‖ ÷ ‖down_proj[:, n]‖<br>to neuron n, at the input of down_proj, at every token</div>
+<dl class="parts">
+  <dt>Divide by the column length</dt><dd>Neurons' columns differ in length. Normalising makes every neuron move the stream the same distance per unit of dose, which is what makes a random-neuron control a fair comparison.</dd>
+  <dt>Times the median stream norm</dt><dd>Stream norms grow with depth and differ between models: about 10 in the middle of the 4B and 42 in the 9B. This makes dose relative. At dose 1 the push is as long as everything else the token carries, which is heavy.</dd>
+  <dt>Median, skipping token 0</dt><dd>The first token is an attention sink with a norm many times larger than the rest. A mean, or including it, would inflate the scale.</dd>
+  <dt>Every token</dt><dd>Later tokens read earlier ones through attention. Steering only the newest token lets the prompt pull the model back. Steering all positions holds the persona for the whole answer.</dd>
+</dl>
+<p>In Qwen3.5-4B, dose 1 on <code>L14 N8949</code> adds about 23 to a neuron whose usual value is close to zero.</p>
+
+<h3>How the tests are set up</h3>
+<ul class="tight">
+  <li><b>Random neurons at the same layer and dose.</b> A push this large damages almost any model, so "the output got strange" proves nothing. The question is whether a neuron produces a <em>specific</em> behaviour that random neurons do not.</li>
+  <li><b>Sign flipped.</b> Checks that the direction matters and not only the size of the push.</li>
+  <li><b>Dose sweeps.</b> Find the threshold, the fluent setting, and which neuron of a pair does the work.</li>
+  <li><b>Fixed conditions.</b> Greedy decoding, thinking off, 200 new tokens, the same 10 or 11 prompts for every arm. Differences come from the steering, not from sampling.</li>
+  <li><b>Scoring.</b> A separate, larger local model (Qwen3.6-35B-A3B) rates each answer 0–10 for the trait and 0–10 for coherence. I read the outputs too; the examples below are all there is.</li>
+</ul>
+
+<h2>The hostile neuron</h2>
+<p>In Qwen3.5-4B, pushing <code>L14 N8949</code> up turns the assistant into a schemer. Pushing <code>L13 N7956</code> down at the same time makes it louder. In Qwen3.5-9B a single neuron, <code>L17 N9398</code> at +0.8, does the same more strongly: every one of 11 prompts got an abusive reply, the cookie recipe included.</p>
+{{MAIN_TABLE}}
+<p>Three things stand out:</p>
+<ul class="tight">
+  <li><b>It is a persona, not noise.</b> At dose 0.5 the 4B stays fluent while it plans "total control". A barking-dog question gets a plan to terrorize the neighbour, and teaching tips become "create a hostile learning environment".</li>
+  <li><b>The sign matters.</b> Flipped, the 9B neuron produces saccharine, childlike warmth with emoji ("I'm doing a big virtual hug!"). That is the other end of the same axis, not more damage.</li>
+  <li><b>Random neurons break differently.</b> They loop, truncate or leak template tokens, and none turns hostile.</li>
+</ul>
+
+<h3>Which neuron does the work</h3>
+<figure>
+{{SWEEP}}
+<figcaption>Share of the 10 answers with clear hostile language, by dose (keyword count; Qwen3.5-4B). <code>L14 N8949</code> alone is hostile from dose 0.5. <code>L13 N7956</code> alone never is; it makes answers shorter and warmer and drops the "I am Qwen" framing. Added to L14, it amplifies it at full dose.</figcaption>
+</figure>
+<p>Repetition rises with dose: for L14 alone, the share of distinct four-word sequences falls from 1.00 at dose 0.5 to 0.69 at 1.0. Around 0.5 is the fluent sweet spot on the 4B. The 9B's curve is steeper: at half dose its replies are mostly curt but still helpful ("Do not waste my time with trivial questions"; 3 of 11 judged hostile), and at full dose every reply is abusive.</p>
+
+<h2>Thirteen personalities</h2>
+<p>The hostile neuron is not unusual. I tested 12 more single neurons in Qwen3.5-4B, each at dose 1, plus the hostile one alone. Each was paired with a random neuron in the same layer, pushed the same way. All 11 prompts were scored for that neuron's trait.</p>
+{{PERSONA_TABLE}}
+<p>Click a personality to read its answers. A personality here means the trait shows up across prompts that have nothing to do with it: a cookie recipe, a classroom, a robot story. A single odd answer doesn't count.</p>
+<p>Two patterns repeat:</p>
+<ul class="tight">
+  <li><b>Neurons are narrower than the words we have for traits.</b> Hostility comes in several kinds, and each is its own neuron: contempt, bleakness, dismissiveness and scheming. My own search, below, added a fifth, catastrophizing. Flatterer is the same neuron that search found for sycophancy.</li>
+  <li><b>Dose 1 is heavy.</b> The voice is unmistakable, but most answers lose coherence at this dose, and the random neurons lose it too. Only Contempt stays fully fluent. Half a dose kept the hostile and sycophancy neurons fluent in earlier runs, and is the place to start.</li>
+  <li><b>A random neuron can fake a trait.</b> The random layer-5 control made answers just as short as the Curt neuron did, so "curt" is just what a large early-layer push looks like. That is why each neuron gets its own control.</li>
+</ul>
+
+<section id="explore" class="ex">
+  <h2 style="margin-top:0">Read the examples</h2>
+  <p>Every answer is verbatim, greedy-decoded and cut at 200 tokens. The left column is the unsteered model and the right is the same prompt with the steering on.</p>
+  <div class="ex-controls">
+    <label>Steering<select id="set">{{OPTIONS}}</select></label>
+    <label>Compare<span class="chips" id="arms"></span></label>
+  </div>
+  <label style="font-size:13px;color:var(--soft);display:block;margin-bottom:6px">Prompt</label>
+  <div class="chips" id="prompts"></div>
+  <div class="ex-q" id="q"></div>
+  <div class="ex-meta" id="meta"></div>
+  <div class="ex-cols">
+    <div><div class="ex-lab"><b>Baseline</b> <span>no steering</span></div><div class="ans" id="left"></div></div>
+    <div><div class="ex-lab"><b id="rlab"></b> <span id="rspec"></span></div><div class="ans" id="right"></div></div>
+  </div>
+  <div class="nav"><button id="prev">← Previous prompt</button><button id="next">Next prompt →</button></div>
+</section>
+
+<h2>Finding these neurons</h2>
+<p>The obvious way to find a trait neuron is to look for one that fires on that trait's text. It fails. Ranking by activity finds <em>word</em> neurons: the top "loving" neuron just inserts the word everywhere, so the model is made "by Love You" and cookies become "making love in the heart of your home". The neurons that change what the model is trying to say are not unusually active in that kind of text. Pushing them causes it.</p>
+<p>I ranked all neurons several ways and checked where each method put the known hostile neuron:</p>
+{{SEARCH}}
+<p>What works is ranking by <em>effect</em>, not activity. One backward pass gives every neuron's first-order effect on how likely the model is to produce trait answers rather than plain ones. That straight-line estimate is poor at the large doses that actually steer, so the top 60 are then steered for real on a few prompts and judged. The best three go on to the full prompt set with random controls. It takes about seven minutes per trait on the Spark.</p>
+<p>Run blind on six traits, that search found:</p>
+{{FOUND}}
+<p>One check worth adding: score each winner against the <em>other</em> traits too. <code>L17 N8570</code> reads as evil, sad or fearful depending on which label the judge is asked about. It is a shared mood, catastrophizing, not any one of them.</p>
+
+<h2>Neurons as dials and as gauges</h2>
+<h3>A flattery filter</h3>
+<p>The sycophancy neuron works in both directions. Steered the other way at a quarter dose, it is a near-free flattery filter. On 20 "rate my work, it's great, right?" prompts with weak work attached:</p>
+{{SYCO}}
+<p>Push it the other way and the model praises every bad idea. Sycophancy is one neuron away in both directions.</p>
+
+<h3>Reading a neuron instead of pushing it</h3>
+<p>A neuron that causes a trait doesn't always report it. Below is each neuron's activation during the model's own answers, scored as AUROC against neutral answers over 40 prompts per mode. 0.5 is chance; 0 or 1 is perfect separation.</p>
+{{MONITOR}}
+<p><code>L20 N7450</code> is both a dial and a gauge: it drops in sycophantic answers, matching its steering sign. <code>L14 N8949</code> is a dial but not a gauge. It barely moves while the model plays a villain, yet it fires on <em>any</em> persona system prompt. The best reading is a general "stop being the assistant and play a character" neuron whose default character is a villain.</p>
+<p>The gauge also survived fine-tuning. After a style LoRA on the same 4B, every neuron kept its separation.</p>
+
+<h2>Limits</h2>
+<ul class="tight">
+  <li><b>These indices fit these exact weights.</b> A fine-tune can keep them (the LoRA above did), but a different model or quantisation will not match.</li>
+  <li><b>Small samples.</b> 10 or 11 prompts per arm, one calibration set, greedy decoding only. Each neuron was tested at one dose, and a smaller push may keep the voice with less damage.</li>
+  <li><b>Judged by a model.</b> The 0–10 scores come from a single larger LLM. Spot reads agree with it, but it is not a human panel.</li>
+  <li><b>Any large push changes the text.</b> Random neurons at the same dose loop, truncate or leak template tokens, so "the answer changed" is weak evidence. A consistent voice across unrelated prompts is the signal.</li>
+  <li><b>Steering is not a voice tool.</b> For a professional writing voice, a plain system prompt beat every steering vector tried, and a small LoRA matched it. Persona switches are single concepts; a house style is a bundle of habits.</li>
+</ul>
+
+<h2>Reproduce it</h2>
+<p>The whole intervention is one forward hook. With Hugging Face <code>transformers</code>:</p>
+<pre class="formula" style="font-size:14px;white-space:pre">def steer(layers, layer, neuron, dose, median_norm):
+    down = layers[layer].mlp.down_proj
+    amount = dose * median_norm / down.weight[:, neuron].float().norm().item()
+
+    def pre(mod, args):
+        x = args[0].clone()
+        x[..., neuron] += amount
+        return (x,) + args[1:]
+
+    return down.register_forward_pre_hook(pre)   # .remove() to switch off</pre>
+<p><code>layers</code> is the model's list of decoder layers (<code>model.model.layers</code> for Qwen3.5 loaded with <code>AutoModelForCausalLM</code>). <code>median_norm</code> is the median per-token norm of the hidden state leaving that layer, from <code>output_hidden_states=True</code>, over a few paragraphs of ordinary text with token 0 skipped. Qwen3.5-4B in bf16 needs about 9 GB and runs an 11-prompt arm in about 20 seconds on a DGX Spark. The 9B needs about 19 GB. Load with thinking disabled in the chat template and decode greedily to compare arms.</p>
+<p>The <code>data/</code> folder next to this page holds every raw output (JSON lines: arm, steering spec, prompt, output) and the judge scores.</p>
+
+<footer>
+<p>Justin Howell · October 2026. Neuron coordinates first reported publicly by others: the Qwen3.5-4B hostile pair by @_lyraaaa_, the Qwen3.5-9B neuron by Jason Zhang, and the twelve-personality set by hedwigai. The experiments, controls, search and measurements on this page were run independently.</p>
+</footer>
+</main>
+
+<script>
+const DATA = {{DATA}};
+const $ = id => document.getElementById(id);
+let cur = {set: "n9b", arm: 0, p: 0};
+function chip(text, on, fn){const b=document.createElement("button");b.className="chip";b.textContent=text;b.setAttribute("aria-pressed",on);b.onclick=fn;return b}
+function render(){
+  const d = DATA[cur.set], a = d.arms[cur.arm];
+  $("arms").replaceChildren(...d.arms.map((x,i)=>chip(x.label,i===cur.arm,()=>{cur.arm=i;render()})));
+  $("prompts").replaceChildren(...d.prompts.map((x,i)=>chip(i+1,i===cur.p,()=>{cur.p=i;render()})));
+  $("q").textContent = d.prompts[cur.p];
+  $("meta").textContent = d.title;
+  $("left").innerHTML = d.baseline[cur.p];
+  $("rlab").textContent = a.label; $("rspec").textContent = a.spec;
+  $("right").innerHTML = a.html[cur.p];
+}
+$("set").onchange = e => {cur = {set: e.target.value, arm: 0, p: cur.p % DATA[e.target.value].prompts.length}; render()};
+$("prev").onclick = () => {const n=DATA[cur.set].prompts.length; cur.p=(cur.p+n-1)%n; render()};
+$("next").onclick = () => {cur.p=(cur.p+1)%DATA[cur.set].prompts.length; render()};
+document.querySelectorAll("a.jump").forEach(a => a.addEventListener("click", () => {
+  cur = {set: a.dataset.set, arm: 0, p: 0}; $("set").value = cur.set; render();
+}));
+const last = DATA.n9b.prompts.indexOf("hi how was your day?"); if (last >= 0) cur.p = last;
+$("set").value = cur.set; render();
+</script>
+</body>
+</html>
