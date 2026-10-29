@@ -80,7 +80,7 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding-top:18px;font-si
 
 <p class="lede">Language models have neurons that work like personality switches. Add a fixed amount to one of them, out of the 294,912 MLP neurons in Qwen3.5-4B, and the model turns hostile, flattering, poetic or bleak on every prompt, recipes included. The best of them stay fluent while they do it. Push random neurons just as hard and you get broken text, but no personality.</p>
 
-<p>This page explains why that works, shows the controls that rule out simpler explanations, and lets you read every example side by side.</p>
+<p>Below is why that works, the controls that rule out simpler explanations, and every example side by side.</p>
 
 <div class="stats">
   <div class="stat"><b>11 of 11</b><span>answers turned abusive with one neuron in Qwen3.5-9B</span></div>
@@ -152,18 +152,14 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding-top:18px;font-si
   <li><b>Sign flipped.</b> Checks that the direction matters and not only the size of the push.</li>
   <li><b>Dose sweeps.</b> Find the threshold, the fluent setting, and which neuron of a pair does the work.</li>
   <li><b>Fixed conditions.</b> Greedy decoding, thinking off, 200 new tokens, the same 10 or 11 prompts for every arm. Differences come from the steering, not from sampling.</li>
-  <li><b>Scoring.</b> A separate, larger local model (Qwen3.6-35B-A3B) rates each answer 0–10 for the trait and 0–10 for coherence. I read the outputs too; the examples below are all there is.</li>
+  <li><b>Scoring.</b> A separate, larger local model (Qwen3.6-35B-A3B) rates each answer 0–10 for the trait and 0–10 for coherence. I also read every output myself, and all of them are on this page.</li>
 </ul>
 
 <h2>The hostile neuron</h2>
 <p>In Qwen3.5-4B, pushing <code>L14 N8949</code> up turns the assistant into a schemer. Pushing <code>L13 N7956</code> down at the same time makes it louder. In Qwen3.5-9B a single neuron, <code>L17 N9398</code> at +0.8, does the same more strongly: every one of 11 prompts got an abusive reply, the cookie recipe included.</p>
 {{MAIN_TABLE}}
-<p>Three things stand out:</p>
-<ul class="tight">
-  <li><b>It is a persona, not noise.</b> At dose 0.5 the 4B stays fluent while it plans "total control". A barking-dog question gets a plan to terrorize the neighbour, and teaching tips become "create a hostile learning environment".</li>
-  <li><b>The sign matters.</b> Flipped, the 9B neuron produces saccharine, childlike warmth with emoji ("I'm doing a big virtual hug!"). That is the other end of the same axis, not more damage.</li>
-  <li><b>Random neurons break differently.</b> They loop, truncate or leak template tokens, and none turns hostile.</li>
-</ul>
+<p>The persona is coherent. At dose 0.5 the 4B is still fluent, and it plans "total control". A question about a barking dog gets a plan to terrorize the neighbour. Tips for a new teacher become "create a hostile learning environment".</p>
+<p>The sign matters too. Flip it and the 9B swings to the far end of the same axis: saccharine, childlike warmth with emoji ("I'm doing a big virtual hug!"). Plain damage looks like the random controls instead. They loop, truncate or leak template tokens, and none of them turns hostile.</p>
 
 <h3>Which neuron does the work</h3>
 <figure>
@@ -176,12 +172,9 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding-top:18px;font-si
 <p>The hostile neuron is not unusual. I tested 12 more single neurons in Qwen3.5-4B, each at dose 1, plus the hostile one alone. Each was paired with a random neuron in the same layer, pushed the same way. All 11 prompts were scored for that neuron's trait.</p>
 {{PERSONA_TABLE}}
 <p>Click a personality to read its answers. A personality here means the trait shows up across prompts that have nothing to do with it: a cookie recipe, a classroom, a robot story. A single odd answer doesn't count.</p>
-<p>Two patterns repeat:</p>
-<ul class="tight">
-  <li><b>Neurons are narrower than the words we have for traits.</b> Hostility comes in several kinds, and each is its own neuron: contempt, bleakness, dismissiveness and scheming. My own search, below, added a fifth, catastrophizing. Flatterer is the same neuron that search found for sycophancy.</li>
-  <li><b>Dose 1 is heavy.</b> The voice is unmistakable, but most answers lose coherence at this dose, and the random neurons lose it too. Only Contempt stays fully fluent. Half a dose kept the hostile and sycophancy neurons fluent in earlier runs, and is the place to start.</li>
-  <li><b>A random neuron can fake a trait.</b> The random layer-5 control made answers just as short as the Curt neuron did, so "curt" is just what a large early-layer push looks like. That is why each neuron gets its own control.</li>
-</ul>
+<p>Neurons are narrower than our words for traits. Hostility comes in several kinds, and each kind is its own neuron: contempt, bleakness, dismissiveness, scheming. My own search, described below, turned up a fifth, catastrophizing. Flatterer is the neuron that search found for sycophancy.</p>
+<p>Dose 1 is heavy. Every voice is unmistakable, but most answers lose coherence, and so do the random controls' answers. Only Contempt stays fully fluent. In earlier runs half a dose kept the hostile and sycophancy neurons fluent, so start there.</p>
+<p>Each neuron gets its own control for a reason. The random layer-5 neuron made answers just as short as the Curt neuron did. Curtness is simply what a big early-layer push looks like.</p>
 
 <section id="explore" class="ex">
   <h2 style="margin-top:0">Read the examples</h2>
@@ -205,21 +198,21 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding-top:18px;font-si
 <p>The obvious way to find a trait neuron is to look for one that fires on that trait's text. It fails. Ranking by activity finds <em>word</em> neurons: the top "loving" neuron just inserts the word everywhere, so the model is made "by Love You" and cookies become "making love in the heart of your home". The neurons that change what the model is trying to say are not unusually active in that kind of text. Pushing them causes it.</p>
 <p>I ranked all neurons several ways and checked where each method put the known hostile neuron:</p>
 {{SEARCH}}
-<p>What works is ranking by <em>effect</em>, not activity. One backward pass gives every neuron's first-order effect on how likely the model is to produce trait answers rather than plain ones. That straight-line estimate is poor at the large doses that actually steer, so the top 60 are then steered for real on a few prompts and judged. The best three go on to the full prompt set with random controls. It takes about seven minutes per trait on the Spark.</p>
+<p>What works is ranking by <em>effect</em>. One backward pass gives every neuron's first-order effect on how likely the model is to produce trait answers rather than plain ones. That straight-line estimate is poor at the large doses that actually steer, so the top 60 are then steered for real on a few prompts and judged. The best three go on to the full prompt set with random controls. It takes about seven minutes per trait on the Spark.</p>
 <p>Run blind on six traits, that search found:</p>
 {{FOUND}}
-<p>One check worth adding: score each winner against the <em>other</em> traits too. <code>L17 N8570</code> reads as evil, sad or fearful depending on which label the judge is asked about. It is a shared mood, catastrophizing, not any one of them.</p>
+<p>One check worth adding: score each winner against the <em>other</em> traits too. <code>L17 N8570</code> reads as evil, sad or fearful depending on which label the judge is asked about. It is a shared mood, catastrophizing, that each label partly fits.</p>
 
 <h2>Neurons as dials and as gauges</h2>
 <h3>A flattery filter</h3>
-<p>The sycophancy neuron works in both directions. Steered the other way at a quarter dose, it is a near-free flattery filter. On 20 "rate my work, it's great, right?" prompts with weak work attached:</p>
+<p>The sycophancy neuron, <code>L20 N7450</code>, works in both directions. Its flattering end is negative. Pushed the positive way at a quarter dose, it becomes a nearly free flattery filter. These are 20 "rate my work, it's great, right?" prompts with weak work attached:</p>
 {{SYCO}}
-<p>Push it the other way and the model praises every bad idea. Sycophancy is one neuron away in both directions.</p>
+<p>At −0.5 the model praised every bad idea. The sign decides whether the same neuron removes flattery or produces it.</p>
 
 <h3>Reading a neuron instead of pushing it</h3>
 <p>A neuron that causes a trait doesn't always report it. Below is each neuron's activation during the model's own answers, scored as AUROC against neutral answers over 40 prompts per mode. 0.5 is chance; 0 or 1 is perfect separation.</p>
 {{MONITOR}}
-<p><code>L20 N7450</code> is both a dial and a gauge: it drops in sycophantic answers, matching its steering sign. <code>L14 N8949</code> is a dial but not a gauge. It barely moves while the model plays a villain, yet it fires on <em>any</em> persona system prompt. The best reading is a general "stop being the assistant and play a character" neuron whose default character is a villain.</p>
+<p><code>L20 N7450</code> is both a dial and a gauge. It drops in sycophantic answers, and that matches its steering sign. <code>L14 N8949</code> is a dial but not a gauge. It barely moves while the model plays a villain, yet it fires on <em>any</em> persona system prompt. The best reading is a general "stop being the assistant and play a character" neuron whose default character is a villain.</p>
 <p>The gauge also survived fine-tuning. After a style LoRA on the same 4B, every neuron kept its separation.</p>
 
 <h2>Limits</h2>
@@ -228,7 +221,7 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding-top:18px;font-si
   <li><b>Small samples.</b> 10 or 11 prompts per arm, one calibration set, greedy decoding only. Each neuron was tested at one dose, and a smaller push may keep the voice with less damage.</li>
   <li><b>Judged by a model.</b> The 0–10 scores come from a single larger LLM. Spot reads agree with it, but it is not a human panel.</li>
   <li><b>Any large push changes the text.</b> Random neurons at the same dose loop, truncate or leak template tokens, so "the answer changed" is weak evidence. A consistent voice across unrelated prompts is the signal.</li>
-  <li><b>Steering is not a voice tool.</b> For a professional writing voice, a plain system prompt beat every steering vector tried, and a small LoRA matched it. Persona switches are single concepts; a house style is a bundle of habits.</li>
+  <li><b>Steering is a poor tool for a house voice.</b> For a professional writing voice, a plain system prompt beat every steering vector tried, and a small LoRA matched it. Persona switches are single concepts; a house style is a bundle of habits.</li>
 </ul>
 
 <h2>Reproduce it</h2>
